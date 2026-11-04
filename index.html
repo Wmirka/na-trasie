@@ -273,13 +273,39 @@
       </div>
     </section>
 
-    <section class="content account-section" id="konto">
-      <h2>Dołącz do Na Trasie</h2>
-      <p class="description">
-        Rejestracja i logowanie zostaną uruchomione
-        po przygotowaniu systemu kont użytkowników.
-      </p>
-    </section>
+  <section class="content account-section" id="konto">
+  <h2>Dołącz do Na Trasie</h2>
+  <p class="description">
+    Załóż konto i zbieraj pieczątki z całej Polski!
+  </p>
+
+  <div style="max-width:420px; margin:25px auto; text-align:left;">
+    <label for="nickname">Twój nick</label>
+    <input id="nickname" type="text" placeholder="Np. Wędrowiec123"
+      style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
+
+    <label for="email">Adres e-mail</label>
+    <input id="email" type="email" placeholder="twoj@email.pl"
+      style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
+
+    <button onclick="sendCode()" style="width:100%; padding:14px; cursor:pointer;">
+      Wyślij kod logowania
+    </button>
+
+    <div id="code-area" style="display:none; margin-top:22px;">
+      <label for="otp-code">Kod z wiadomości e-mail</label>
+      <input id="otp-code" type="text" inputmode="numeric"
+        maxlength="6" placeholder="123456"
+        style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
+
+      <button onclick="verifyCode()" style="width:100%; padding:14px; cursor:pointer;">
+        Potwierdź kod i zaloguj się
+      </button>
+    </div>
+
+    <p id="auth-message" style="margin-top:18px;"></p>
+  </div>
+</section>
   </main>
 
   <footer>
