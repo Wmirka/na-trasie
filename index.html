@@ -327,5 +327,75 @@
   );
 
   console.log("Na Trasie: połączono z Supabase!");
+  let pendingNickname = "";
+
+async function sendCode() {
+  const nickname = document.getElementById("nickname").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const message = document.getElementById("auth-message");
+
+  if (!email) {
+    message.textContent = "Wpisz adres e-mail.";
+    return;
+  }
+
+  pendingNickname = nickname;
+
+  message.textContent = "Wysyłanie kodu...";
+
+  const { error } = await supabaseClient.auth.signInWithOtp({
+    email: email,
+    options: {
+      shouldCreateUser: true,
+      data: { nickname: nickname }
+    }
+  });
+
+  if (error) {
+    message.textContent = "Błąd: " + error.message;
+    return;
+  }
+
+  document.getElementById("code-area").style.display = "block";
+  message.textContent = "Kod został wysłany. Sprawdź swoją pocztę.";
+}
+
+async function verifyCode() {
+  const email = document.getElementById("email").value.trim();
+  const token = document.getElementById("otp-code").value.trim();
+  const message = document.getElementById("auth-message");
+
+  if (!email || !token) {
+    message.textContent = "Wpisz e-mail i kod.";
+    return;
+  }
+
+  message.textContent = "Sprawdzanie kodu...";
+
+  const { data, error } = await supabaseClient.auth.verifyOtp({
+    email: email,
+    token: token,
+    type: "email"
+  });
+
+  if (error) {
+    message.textContent = "Błędny kod lub kod wygasł: " + error.message;
+    return;
+  }
+
+  if (pendingNickname && data.user) {
+    const { error: profileError } = await supabaseClient
+      .from("profiles")
+      .update({ nickname: pendingNickname })
+      .eq("id", data.user.id);
+
+    if (profileError) {
+      message.textContent = "Zalogowano, ale nie udało się zapisać nicku: " + profileError.message;
+      return;
+    }
+  }
+
+  message.textContent = "Zalogowano pomyślnie! Witaj na Na Trasie!";
+}
 </script>
 </html>
