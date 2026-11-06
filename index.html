@@ -405,7 +405,7 @@ function authPage(mode) {
         <button class="btn btn-primary" style="width:100%" type="submit">Potwierdź kod i zaloguj się</button>
         <button type="button" class="btn btn-outline" style="width:100%;margin-top:9px" onclick="backToEmail()">Zmień adres e-mail</button>
       </form>
-      <div class="auth-foot">${isRegister?'Masz już konto? <button onclick="go(\\'/logowanie\\')">Zaloguj się</button>':'Nie masz jeszcze konta? <button onclick="go(\\'/rejestracja\\')">Zarejestruj się</button>'}</div>
+     <div class="auth-foot">${isRegister?'Masz już konto? <button onclick="go('/logowanie')">Zaloguj się</button>':'Nie masz jeszcze konta? <button onclick="go('/rejestracja')">Zarejestruj się</button>'}</div>
     </div></div>`;
 }
 async function sendOtp(event) {
