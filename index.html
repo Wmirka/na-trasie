@@ -1,401 +1,735 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Na Trasie – odkrywaj Polskę, zdobywaj pieczątki i twórz własną kolekcję turystyczną.">
-  <title>Na Trasie – Odkrywaj Polskę</title>
+  <meta name="theme-color" content="#176b45">
+  <meta name="description" content="Na Trasie – zbieraj pieczątki turystyczne z całej Polski, rozwijaj swoją kolekcję i zdobywaj kolejne poziomy.">
+  <title>Na Trasie – Twoja podróż, Twoja kolekcja</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23176b45'/%3E%3Cpath d='M25 68 45 27l12 25 8-15 13 31H25Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f8f5;
-      color: #24382e;
+    :root {
+      --green:#176b45;
+      --green-dark:#105337;
+      --green-light:#eaf5ee;
+      --ink:#18251e;
+      --muted:#718078;
+      --line:#e8eee9;
+      --bg:#f7f9f7;
+      --white:#fff;
+      --gold:#d49a32;
+      --red:#c34c4c;
+      --shadow:0 12px 36px rgba(24,55,37,.07);
+      --radius:20px;
     }
-
-    header {
-      background: white;
-      padding: 20px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      box-shadow: 0 2px 12px #0000000a;
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif;font-size:15px}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    .hidden{display:none!important}
+    .app{min-height:100vh}
+    .topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;position:sticky;top:0;z-index:20}
+    .topbar-inner{width:min(1180px,calc(100% - 40px));margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;font-family:Manrope,sans-serif;font-weight:800;font-size:21px;letter-spacing:-.8px}
+    .brand-mark{width:39px;height:39px;background:var(--green);border-radius:13px;display:grid;place-items:center;color:white}
+    .brand-mark svg{width:23px;height:23px}
+    .nav{display:flex;align-items:center;gap:5px}
+    .nav button{border:0;background:transparent;color:#69766e;padding:11px 13px;border-radius:11px;font-weight:600;font-size:13px}
+    .nav button:hover,.nav button.active{background:var(--green-light);color:var(--green)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .user-chip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:30px;padding:6px 12px 6px 6px;font-size:13px;font-weight:700}
+    .avatar{width:31px;height:31px;border-radius:50%;background:var(--green-light);color:var(--green);display:grid;place-items:center;font-weight:800}
+    .btn{border:0;border-radius:12px;padding:12px 17px;font-weight:700;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-primary{background:var(--green);color:white;box-shadow:0 5px 14px rgba(23,107,69,.15)}
+    .btn-primary:hover{background:var(--green-dark);transform:translateY(-1px)}
+    .btn-secondary{background:var(--green-light);color:var(--green)}
+    .btn-outline{background:white;color:var(--ink);border:1px solid var(--line)}
+    .btn-danger{background:#fff0f0;color:var(--red)}
+    .btn-small{padding:9px 12px;font-size:12px;border-radius:9px}
+    main{width:min(1180px,calc(100% - 40px));margin:34px auto 70px;min-height:65vh}
+    .hero{background:linear-gradient(115deg,#104d34 0%,#176b45 58%,#2c8057 100%);color:white;border-radius:28px;padding:54px 55px;position:relative;overflow:hidden;min-height:350px;display:flex;align-items:center}
+    .hero:after{content:"";position:absolute;width:430px;height:430px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-75px;top:-115px;box-shadow:0 0 0 45px rgba(255,255,255,.035),0 0 0 95px rgba(255,255,255,.025)}
+    .hero-content{max-width:600px;position:relative;z-index:1}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:800;opacity:.75;margin-bottom:17px}
+    h1,h2,h3,p{margin-top:0}
+    .hero h1{font:800 clamp(34px,5vw,57px)/1.08 Manrope,sans-serif;letter-spacing:-2.5px;margin:0 0 18px}
+    .hero p{font-size:16px;line-height:1.7;color:rgba(255,255,255,.8);max-width:500px;margin-bottom:26px}
+    .hero .btn{background:white;color:var(--green);padding:14px 20px}
+    .hero-note{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.72);margin-top:17px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:39px 0 18px}
+    .section-head h2{font:800 23px Manrope,sans-serif;letter-spacing:-.7px;margin:0 0 5px}
+    .section-head p{color:var(--muted);font-size:13px;margin:0}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:22px}
+    .stat,.panel,.stamp-card,.feature-card{background:white;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 4px 18px rgba(24,55,37,.025)}
+    .stat{padding:20px 22px}
+    .stat-label{font-size:12px;color:var(--muted);font-weight:600}
+    .stat-value{font:800 28px Manrope,sans-serif;margin:8px 0 3px;letter-spacing:-1px}
+    .stat-sub{font-size:11px;color:#94a098}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .feature-card{padding:22px}
+    .feature-icon{width:43px;height:43px;border-radius:14px;background:var(--green-light);color:var(--green);display:grid;place-items:center;font-size:20px;margin-bottom:17px}
+    .feature-card h3{font:700 16px Manrope,sans-serif;margin-bottom:8px}
+    .feature-card p{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+    .page-title{font:800 31px Manrope,sans-serif;letter-spacing:-1.3px;margin:0 0 8px}
+    .page-desc{color:var(--muted);margin:0 0 27px;line-height:1.6}
+    .panel{padding:25px;margin-bottom:18px}
+    .panel h3{font:800 17px Manrope,sans-serif;margin-bottom:7px}
+    .panel-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .field.full{grid-column:1/-1}
+    .field label{font-size:12px;font-weight:700;color:#536158}
+    .field input,.field select,.field textarea{width:100%;border:1px solid #dfe7e1;border-radius:11px;padding:12px 13px;background:white;color:var(--ink);outline:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(23,107,69,.08)}
+    .field textarea{min-height:90px;resize:vertical}
+    .help{font-size:11px;color:var(--muted);line-height:1.5}
+    .auth-wrap{max-width:480px;margin:35px auto}
+    .auth-card{background:white;border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow)}
+    .auth-card h1{font:800 27px Manrope,sans-serif;letter-spacing:-1px;margin-bottom:8px}
+    .auth-card>p{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:24px}
+    .auth-card .field{margin-bottom:15px}
+    .auth-foot{text-align:center;font-size:12px;color:var(--muted);margin-top:20px}
+    .auth-foot button{border:0;background:none;color:var(--green);font-weight:800}
+    .notice{padding:13px 15px;border-radius:11px;background:#eff7f1;color:var(--green);font-size:12px;line-height:1.5;margin:15px 0}
+    .notice.error{background:#fff0f0;color:var(--red)}
+    .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+    .stamp-card{overflow:hidden}
+    .stamp-photo{height:190px;background:#edf2ee;display:grid;place-items:center;overflow:hidden;color:#9aaa9f}
+    .stamp-photo img{width:100%;height:100%;object-fit:cover}
+    .stamp-body{padding:17px}
+    .stamp-body h3{font:700 15px Manrope,sans-serif;margin:0 0 6px}
+    .stamp-meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+    .status{display:inline-flex;align-items:center;border-radius:30px;padding:5px 9px;font-size:10px;font-weight:800}
+    .status.approved{background:#e9f6ed;color:#287447}
+    .status.pending{background:#fff5df;color:#9a6a15}
+    .status.rejected{background:#fff0f0;color:#b64a4a}
+    .status.review{background:#edf2ff;color:#4d62a5}
+    .empty{padding:44px 20px;text-align:center;background:white;border:1px dashed #d9e3dc;border-radius:18px;color:var(--muted)}
+    .empty-icon{font-size:30px;margin-bottom:12px}
+    .empty h3{color:var(--ink);font:700 16px Manrope,sans-serif;margin-bottom:7px}
+    .empty p{font-size:12px;line-height:1.6;margin:0 auto 16px;max-width:360px}
+    .profile-head{display:flex;align-items:center;gap:20px;padding:25px}
+    .profile-avatar{width:72px;height:72px;border-radius:23px;background:var(--green-light);color:var(--green);display:grid;place-items:center;font:800 27px Manrope}
+    .profile-name{font:800 24px Manrope;margin:0 0 5px}
+    .profile-info{color:var(--muted);font-size:12px}
+    .progress{height:9px;background:#edf1ed;border-radius:20px;overflow:hidden;margin:13px 0 7px}
+    .progress span{height:100%;display:block;background:linear-gradient(90deg,#176b45,#59a878);border-radius:20px}
+    .progress-caption{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+    .table-wrap{overflow-x:auto}
+    table{border-collapse:collapse;width:100%;font-size:12px}
+    th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.6px;padding:12px;border-bottom:1px solid var(--line)}
+    td{padding:14px 12px;border-bottom:1px solid #f0f3f0}
+    tr:last-child td{border-bottom:0}
+    .rank-number{font:800 15px Manrope;color:#8c9a90}
+    .rank-user{display:flex;align-items:center;gap:10px;font-weight:700}
+    .rank-avatar{width:31px;height:31px;border-radius:50%;background:var(--green-light);color:var(--green);display:grid;place-items:center;font-weight:800}
+    .update-card{background:white;border:1px solid var(--line);border-radius:17px;padding:22px;margin-bottom:13px}
+    .update-date{font-size:11px;color:var(--green);font-weight:800;margin-bottom:9px}
+    .update-card h3{font:800 17px Manrope;margin:0 0 8px}
+    .update-card p{font-size:13px;line-height:1.7;color:var(--muted);white-space:pre-wrap;margin:0}
+    .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .admin-stamp{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .admin-stamp:last-child{border:0}
+    .admin-thumb{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#edf2ee}
+    .admin-stamp-info{flex:1;min-width:0}
+    .admin-stamp-info strong{display:block;font-size:12px;margin-bottom:4px}
+    .admin-stamp-info small{color:var(--muted);font-size:10px}
+    .admin-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .footer{border-top:1px solid var(--line);background:white;padding:27px 20px}
+    .footer-inner{width:min(1180px,100%);margin:auto;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:11px}
+    .toast{position:fixed;bottom:22px;right:22px;z-index:60;background:#18251e;color:white;padding:14px 18px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;max-width:min(380px,calc(100% - 44px))}
+    .toast.bad{background:#9e3737}
+    .loading{padding:45px;text-align:center;color:var(--muted);font-size:13px}
+    .mobile-menu{display:none}
+    @media(max-width:850px){
+      .nav{gap:0}.nav button{padding:10px 8px;font-size:11px}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .stamp-grid{grid-template-columns:repeat(2,1fr)}
+      .hero{padding:42px 35px}
     }
-
-    .logo {
-      color: #236443;
-      font-size: 25px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-
-    nav { display: flex; gap: 22px; flex-wrap: wrap; }
-
-    nav a {
-      color: #42564a;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    nav a:hover { color: #27814e; }
-
-    .account {
-      background: #236443;
-      color: white;
-      padding: 12px 19px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .hero {
-      padding: 100px 9%;
-      min-height: 480px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 35px;
-      background: linear-gradient(120deg, #e4efe5, #f5f1e5);
-    }
-
-    .hero-content { max-width: 650px; }
-
-    .eyebrow {
-      color: #328052;
-      font-weight: bold;
-      letter-spacing: 2px;
-      font-size: 12px;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-size: clamp(42px, 6vw, 68px);
-      line-height: 1.1;
-      margin-bottom: 23px;
-    }
-
-    h1 span { color: #28774b; }
-
-    .intro {
-      color: #627168;
-      font-size: 18px;
-      line-height: 1.7;
-      margin-bottom: 30px;
-    }
-
-    .main-button {
-      display: inline-block;
-      background: #236443;
-      color: white;
-      padding: 15px 24px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .mountain { font-size: clamp(100px, 17vw, 185px); }
-
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 100px;
-      padding: 35px 20px;
-      background: #20583c;
-      color: white;
-      text-align: center;
-    }
-
-    .stats strong { display: block; font-size: 30px; margin-bottom: 7px; }
-    .stats span { color: #d3e5d8; font-size: 14px; }
-
-    section.content {
-      padding: 85px 9%;
-      text-align: center;
-    }
-
-    h2 { font-size: 34px; margin-bottom: 20px; }
-
-    .description {
-      max-width: 680px;
-      margin: 0 auto 40px;
-      color: #68766d;
-      line-height: 1.8;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-    }
-
-    .feature {
-      background: white;
-      padding: 32px 23px;
-      border-radius: 13px;
-      box-shadow: 0 5px 25px #20352c0a;
-    }
-
-    .feature .symbol { font-size: 42px; }
-    .feature h3 { margin: 17px 0 12px; }
-    .feature p { color: #68766d; line-height: 1.6; }
-
-    .collection { background: #eaf1e9; }
-
-    .empty {
-      max-width: 650px;
-      margin: auto;
-      padding: 35px;
-      border: 2px dashed #9bb9a2;
-      border-radius: 13px;
-      color: #54705c;
-      line-height: 2;
-    }
-
-    .news {
-      max-width: 650px;
-      margin: auto;
-      padding: 28px;
-      background: white;
-      text-align: left;
-      border-radius: 12px;
-      line-height: 1.8;
-    }
-
-    .news p { color: #68766d; }
-
-    .account-section { background: #e5efe6; }
-
-    footer {
-      padding: 35px 20px;
-      background: #183e2c;
-      color: white;
-      text-align: center;
-      line-height: 2;
-    }
-
-    footer p, footer small { color: #c6d8cb; }
-
-    @media (max-width: 750px) {
-      header { justify-content: center; }
-      nav { justify-content: center; }
-      .hero { text-align: center; flex-direction: column; padding: 65px 7%; }
-      .stats { gap: 30px; flex-wrap: wrap; }
-      .features { grid-template-columns: 1fr; }
+    @media(max-width:650px){
+      .topbar{height:auto;min-height:66px}.topbar-inner{width:calc(100% - 28px);flex-wrap:wrap;padding:12px 0;gap:10px}
+      .brand{font-size:19px}.nav{order:3;width:100%;overflow-x:auto;padding-bottom:2px}
+      .nav button{white-space:nowrap;padding:9px 11px}
+      .nav-right{margin-left:auto}.user-chip span:last-child{display:none}
+      main{width:calc(100% - 28px);margin:22px auto 50px}
+      .hero{padding:35px 25px;min-height:340px;border-radius:22px}
+      .hero h1{letter-spacing:-1.6px}.hero p{font-size:14px}
+      .features{grid-template-columns:1fr}.stats{gap:10px}.stat{padding:16px}
+      .stat-value{font-size:24px}.stamp-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .stamp-photo{height:135px}.stamp-body{padding:12px}.stamp-body h3{font-size:13px}
+      .form-grid,.admin-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+      .auth-card{padding:25px 21px}.panel{padding:19px}
+      .profile-head{padding:18px;gap:14px}.profile-avatar{width:58px;height:58px}
+      .profile-name{font-size:20px}.footer-inner{flex-direction:column}
+      .section-head{align-items:start;flex-direction:column}
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <a href="#" class="logo">🧭 Na Trasie</a>
-    <nav>
-      <a href="#start">Start</a>
-      <a href="#projekt">O projekcie</a>
-      <a href="#pieczatki">Pieczątki</a>
-      <a href="#aktualnosci">Aktualności</a>
-    </nav>
-    <a href="#konto" class="account">Moje konto</a>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/" aria-label="Na Trasie – strona główna">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 19 7-14 4 8 2-4 5 10H3Z"/><path d="M7 19h10"/></svg>
+        </span>
+        Na Trasie
+      </a>
+      <nav class="nav" id="navigation">
+        <button data-route="/" class="active">Start</button>
+        <button data-route="/ranking">Ranking</button>
+        <button data-route="/aktualnosci">Aktualności</button>
+        <button data-route="/ksiazeczka">Książeczka</button>
+      </nav>
+      <div class="nav-right" id="navRight">
+        <button class="btn btn-primary btn-small" onclick="go('/logowanie')">Zaloguj się</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <div class="hero" id="start">
-      <div class="hero-content">
-        <p class="eyebrow">ODKRYWAJ • ZBIERAJ • PODRÓŻUJ</p>
-        <h1>Polska czeka.<br><span>Ruszaj na trasę!</span></h1>
-        <p class="intro">
-          Odwiedzaj niezwykłe miejsca w całej Polsce,
-          zdobywaj turystyczne pieczątki i twórz
-          własną kolekcję wspomnień.
-        </p>
-        <a href="#projekt" class="main-button">Poznaj nasz projekt →</a>
-      </div>
-      <div class="mountain">🏔️</div>
-    </div>
-
-    <div class="stats">
-      <div><strong>16</strong><span>województw</span></div>
-      <div><strong>∞</strong><span>miejsc do odkrycia</span></div>
-      <div><strong>1</strong><span>wielka przygoda</span></div>
-    </div>
-
-    <section class="content" id="projekt">
-      <p class="eyebrow">POZNAJ NAS</p>
-      <h2>Czym jest Na Trasie?</h2>
-      <p class="description">
-        Na Trasie to platforma dla miłośników turystyki.
-        Pozwala zbierać pieczątki z odwiedzonych miejsc,
-        rozwijać własny profil, zdobywać osiągnięcia
-        i poznawać Polskę.
-      </p>
-
-      <div class="features">
-        <article class="feature">
-          <div class="symbol">📸</div>
-          <h3>Zbieraj pieczątki</h3>
-          <p>Dodawaj zdjęcia pieczątek zdobytych podczas podróży.</p>
-        </article>
-        <article class="feature">
-          <div class="symbol">🏆</div>
-          <h3>Zdobywaj poziomy</h3>
-          <p>Rozwijaj kolekcję i odblokowuj turystyczne osiągnięcia.</p>
-        </article>
-        <article class="feature">
-          <div class="symbol">🗺️</div>
-          <h3>Odkrywaj Polskę</h3>
-          <p>Wyruszaj na nowe szlaki i poznawaj ciekawe miejsca.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="content collection" id="pieczatki">
-      <p class="eyebrow">TWOJA PRZYGODA</p>
-      <h2>Wirtualna książeczka</h2>
-      <p class="description">
-        Każda pieczątka to kolejna historia i miejsce,
-        które udało Ci się odwiedzić.
-      </p>
-      <div class="empty">
-        📔<br>
-        Twoja kolekcja zaczyna się od pierwszej wyprawy!
-      </div>
-    </section>
-
-    <section class="content" id="aktualnosci">
-      <p class="eyebrow">CO NOWEGO?</p>
-      <h2>Aktualności</h2>
-      <div class="news">
-        <strong>Witamy w Na Trasie!</strong>
-        <p>Przygotowujemy platformę dla turystów z całej Polski.</p>
-      </div>
-    </section>
-
-  <section class="content account-section" id="konto">
-  <h2>Dołącz do Na Trasie</h2>
-  <p class="description">
-    Załóż konto i zbieraj pieczątki z całej Polski!
-  </p>
-
-  <div style="max-width:420px; margin:25px auto; text-align:left;">
-    <label for="nickname">Twój nick</label>
-    <input id="nickname" type="text" placeholder="Np. Wędrowiec123"
-      style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
-
-    <label for="email">Adres e-mail</label>
-    <input id="email" type="email" placeholder="twoj@email.pl"
-      style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
-
-    <button onclick="sendCode()" style="width:100%; padding:14px; cursor:pointer;">
-      Wyślij kod logowania
-    </button>
-
-    <div id="code-area" style="display:none; margin-top:22px;">
-      <label for="otp-code">Kod z wiadomości e-mail</label>
-      <input id="otp-code" type="text" inputmode="numeric"
-        maxlength="6" placeholder="123456"
-        style="width:100%; padding:13px; margin:8px 0 18px; border-radius:8px;">
-
-      <button onclick="verifyCode()" style="width:100%; padding:14px; cursor:pointer;">
-        Potwierdź kod i zaloguj się
-      </button>
-    </div>
-
-    <p id="auth-message" style="margin-top:18px;"></p>
-  </div>
-</section>
+  <main id="appMain">
+    <div class="loading">Ładowanie Na Trasie…</div>
   </main>
 
-  <footer>
-    <strong>🧭 Na Trasie</strong>
-    <p>Odkrywaj Polskę na własnych zasadach.</p>
-    <small>© 2026 Na Trasie</small>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong style="color:var(--green)">Na Trasie</strong> · Twoja podróż, Twoja kolekcja.</div>
+      <div>Odkrywaj Polskę. Zbieraj wspomnienia. Zdobywaj pieczątki.</div>
+    </div>
   </footer>
-
-</body>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
+<div id="toast" class="toast hidden" role="status"></div>
 
 <script>
-  const SUPABASE_URL = "https://lpvmvgwbefboamdrjvqv.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_KHM7DyfNyj8WRKTMSxQQDA_d3Jyhf5s";
+/* ==========================================================
+   NA TRASIE – KONFIGURACJA
+   Wklej tutaj swój klucz publishable/anon z Supabase.
+   NIGDY nie wklejaj tutaj klucza service_role ani klucza AI.
+   ========================================================== */
+const SUPABASE_URL = "https://lpvmvgwbefboamdrjvqv.supabase.co";
+const SUPABASE_KEY = "WKLEJ_TUTAJ_KLUCZ_PUBLISHABLE";
 
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const supabaseReady =
+  SUPABASE_KEY !== "WKLEJ_TUTAJ_KLUCZ_PUBLISHABLE" &&
+  SUPABASE_KEY.length > 20 &&
+  window.supabase;
 
-  console.log("Na Trasie: połączono z Supabase!");
-  let pendingNickname = "";
+const db = supabaseReady
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
 
-async function sendCode() {
-  const nickname = document.getElementById("nickname").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const message = document.getElementById("auth-message");
+const BUCKET = "stamp-photos";
+const state = {
+  session:null, user:null, profile:null, stamps:[], updates:[],
+  ranking:[], achievements:[], route:"/", authEmail:"", authMode:"login",
+  selectedFile:null, adminStamps:[]
+};
 
-  if (!email) {
-    message.textContent = "Wpisz adres e-mail.";
-    return;
-  }
+const $ = (selector) => document.querySelector(selector);
+const esc = (value) => String(value ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+}[c]));
+const datePL = (value) => value ? new Date(value).toLocaleDateString("pl-PL") : "—";
+const initials = (name) => (name || "?").trim().slice(0,2).toUpperCase();
 
-  pendingNickname = nickname;
-
-  message.textContent = "Wysyłanie kodu...";
-
-  const { error } = await supabaseClient.auth.signInWithOtp({
-    email: email,
-    options: {
-      shouldCreateUser: true,
-      data: { nickname: nickname }
-    }
+function toast(message, bad=false) {
+  const el=$("#toast");
+  el.textContent=message;
+  el.classList.remove("hidden","bad");
+  if(bad) el.classList.add("bad");
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>el.classList.add("hidden"),4200);
+}
+function go(route) {
+  location.hash = route === "/" ? "/" : route;
+}
+function currentRoute() {
+  const route=location.hash.replace(/^#/, "") || "/";
+  return route.split("?")[0];
+}
+function setNav() {
+  const route=state.route;
+  document.querySelectorAll("[data-route]").forEach(b=>{
+    b.classList.toggle("active",b.dataset.route===route);
   });
-
-  if (error) {
-    message.textContent = "Błąd: " + error.message;
-    return;
+  const right=$("#navRight");
+  if(state.user) {
+    right.innerHTML=`
+      <button class="user-chip" onclick="go('/profil')">
+        <span class="avatar">${esc(initials(state.profile?.nickname || state.user.email))}</span>
+        <span>${esc(state.profile?.nickname || "Moje konto")}</span>
+      </button>
+      <button class="btn btn-outline btn-small" onclick="logout()">Wyloguj</button>`;
+    if(state.profile?.role==="admin") {
+      right.insertAdjacentHTML("afterbegin",`<button class="btn btn-secondary btn-small" onclick="go('/admin')">Panel</button>`);
+    }
+  } else {
+    right.innerHTML=`<button class="btn btn-primary btn-small" onclick="go('/logowanie')">Zaloguj się</button>`;
   }
-
-  document.getElementById("code-area").style.display = "block";
-  message.textContent = "Kod został wysłany. Sprawdź swoją pocztę.";
+}
+function needConfig() {
+  if(!db) {
+    $("#appMain").innerHTML=`
+      <div class="auth-wrap"><div class="auth-card">
+        <h1>Jeszcze chwila!</h1>
+        <p>Strona wymaga klucza publicznego Supabase. W pliku <strong>index.html</strong> znajdź sekcję „KONFIGURACJA” i zastąp tekst <strong>WKLEJ_TUTAJ_KLUCZ_PUBLISHABLE</strong> swoim kluczem publishable.</p>
+        <div class="notice">Klucz publiczny (publishable/anon) jest przeznaczony do użycia na stronie. Nie wklejaj klucza service_role.</div>
+      </div></div>`;
+    return true;
+  }
+  return false;
 }
 
-async function verifyCode() {
-  const email = document.getElementById("email").value.trim();
-  const token = document.getElementById("otp-code").value.trim();
-  const message = document.getElementById("auth-message");
+async function refreshSession() {
+  if(!db) return;
+  const {data,error}=await db.auth.getSession();
+  if(error) console.error(error);
+  state.session=data?.session || null;
+  state.user=state.session?.user || null;
+  if(state.user) await loadProfile();
+  else state.profile=null;
+}
+async function loadProfile() {
+  if(!state.user) return;
+  const {data,error}=await db.from("profiles").select("*").eq("id",state.user.id).maybeSingle();
+  if(error) { console.error(error); return; }
+  state.profile=data;
+}
+async function loadStamps() {
+  if(!state.user) {state.stamps=[];return;}
+  const {data,error}=await db.from("stamps")
+    .select("id,place_name,region,acquired_at,status,photo_path,created_at,ai_note")
+    .eq("user_id",state.user.id).order("created_at",{ascending:false});
+  if(error) {console.error(error);state.stamps=[];return;}
+  state.stamps=data||[];
+}
+async function loadUpdates() {
+  const {data,error}=await db.from("updates").select("*")
+    .eq("published",true).order("created_at",{ascending:false});
+  if(error){console.error(error);state.updates=[];return;}
+  state.updates=data||[];
+}
+async function loadRanking() {
+  const {data,error}=await db.from("profiles")
+    .select("id,nickname,level,stamp_count")
+    .order("stamp_count",{ascending:false}).limit(50);
+  if(error){console.error(error);state.ranking=[];return;}
+  state.ranking=data||[];
+}
+async function loadAchievements() {
+  if(!state.user){state.achievements=[];return;}
+  const {data,error}=await db.from("user_achievements")
+    .select("achievement_id,earned_at,achievements(name,description,icon)")
+    .eq("user_id",state.user.id);
+  if(error){console.error(error);state.achievements=[];return;}
+  state.achievements=data||[];
+}
+async function signedPhoto(path) {
+  if(!path) return "";
+  const {data,error}=await db.storage.from(BUCKET).createSignedUrl(path,3600);
+  if(error){console.error(error);return "";}
+  return data?.signedUrl||"";
+}
+async function logout() {
+  const {error}=await db.auth.signOut();
+  if(error){toast(error.message,true);return;}
+  state.user=null;state.profile=null;state.stamps=[];
+  toast("Wylogowano.");
+  go("/");
+}
 
-  if (!email || !token) {
-    message.textContent = "Wpisz e-mail i kod.";
-    return;
+function homePage() {
+  const count=state.profile?.stamp_count ?? "—";
+  const level=state.profile?.level ?? "—";
+  $("#appMain").innerHTML=`
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">Polska czeka na odkrycie</div>
+        <h1>Każda trasa<br>zostawia ślad.</h1>
+        <p>Zbieraj pieczątki turystyczne z całej Polski, twórz własną kolekcję i sprawdzaj, dokąd zaprowadzi Cię kolejna przygoda.</p>
+        <button class="btn" onclick="go('${state.user?"/ksiazeczka":"/rejestracja"}')">${state.user?"Otwórz swoją książeczkę":"Dołącz do Na Trasie"} <span>→</span></button>
+        <div class="hero-note">✦ Cała Polska · Wirtualna książeczka · Wspólna przygoda</div>
+      </div>
+    </section>
+    <section class="stats">
+      <div class="stat"><div class="stat-label">Twoje pieczątki</div><div class="stat-value">${esc(count)}</div><div class="stat-sub">Zatwierdzone zdobycze</div></div>
+      <div class="stat"><div class="stat-label">Twój poziom</div><div class="stat-value">${esc(level)}</div><div class="stat-sub">Rozwijaj swoją kolekcję</div></div>
+      <div class="stat"><div class="stat-label">Status konta</div><div class="stat-value" style="font-size:21px">${state.user?"Aktywne":"Odkrywca"}</div><div class="stat-sub">${state.user?"Miło Cię widzieć!":"Załóż konto i ruszaj w drogę"}</div></div>
+      <div class="stat"><div class="stat-label">Miejsce w rankingu</div><div class="stat-value" style="font-size:21px">${state.user?rankPosition():"—"}</div><div class="stat-sub">Na podstawie pieczątek</div></div>
+    </section>
+    <div class="section-head"><div><h2>Jak działa Na Trasie?</h2><p>Twoja przygoda zaczyna się od pierwszej pieczątki.</p></div></div>
+    <section class="features">
+      <article class="feature-card"><div class="feature-icon">📍</div><h3>Odkrywaj miejsca</h3><p>Wyruszaj na szlaki, odwiedzaj atrakcje i poznawaj ciekawe zakątki Polski.</p></article>
+      <article class="feature-card"><div class="feature-icon">📖</div><h3>Zbieraj pieczątki</h3><p>Dodawaj zdjęcia zdobytych pieczątek i buduj własną wirtualną książeczkę.</p></article>
+      <article class="feature-card"><div class="feature-icon">🏆</div><h3>Zdobywaj poziomy</h3><p>Rozwijaj kolekcję, zdobywaj osiągnięcia i porównuj wyniki w rankingu.</p></article>
+    </section>
+    <div class="section-head"><div><h2>Najnowsze aktualności</h2><p>Ważne informacje z projektu Na Trasie.</p></div><button class="btn btn-outline btn-small" onclick="go('/aktualnosci')">Wszystkie aktualności →</button></div>
+    <div id="homeUpdates">${updatesPreview()}</div>`;
+}
+function rankPosition() {
+  if(!state.user||!state.ranking.length)return "—";
+  const index=state.ranking.findIndex(x=>x.id===state.user.id);
+  return index<0?"—":`#${index+1}`;
+}
+function updatesPreview() {
+  if(!state.updates.length)return `<div class="empty"><div class="empty-icon">📰</div><h3>Na razie cisza na szlaku</h3><p>Gdy pojawią się aktualności, znajdziesz je właśnie tutaj.</p></div>`;
+  return state.updates.slice(0,2).map(u=>`
+    <article class="update-card"><div class="update-date">${datePL(u.created_at)}</div>
+    <h3>${esc(u.title)}</h3><p>${esc(u.content)}</p></article>`).join("");
+}
+
+function authPage(mode) {
+  const isRegister=mode==="register";
+  state.authMode=mode;
+  $("#appMain").innerHTML=`
+    <div class="auth-wrap"><div class="auth-card">
+      <div class="eyebrow" style="color:var(--green)">Na Trasie · Twoje konto</div>
+      <h1>${isRegister?"Dołącz do przygody":"Witaj ponownie"}</h1>
+      <p>${isRegister?"Utwórz konto, aby zbierać pieczątki i prowadzić własną książeczkę.":"Zaloguj się bez hasła. Wyślemy Ci jednorazowy kod na e-mail."}</p>
+      <div id="authNotice"></div>
+      <form id="authForm" onsubmit="sendOtp(event)">
+        ${isRegister?`<div class="field"><label for="nickname">Twój nick</label><input id="nickname" name="nickname" maxlength="24" minlength="3" required placeholder="Np. Wędrowiec123"></div>`:""}
+        <div class="field"><label for="email">Adres e-mail</label><input id="email" name="email" type="email" required autocomplete="email" placeholder="twoj@email.pl"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:7px" type="submit">${isRegister?"Utwórz konto i wyślij kod":"Wyślij kod logowania"} →</button>
+      </form>
+      <form id="otpForm" class="hidden" onsubmit="verifyOtp(event)">
+        <div class="notice">Wysłaliśmy kod na adres <strong id="sentEmail"></strong>. Wpisz sześć cyfr z wiadomości.</div>
+        <div class="field"><label for="otp">Kod weryfikacyjny</label><input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" minlength="6" pattern="[0-9]{6}" required placeholder="000000"></div>
+        <button class="btn btn-primary" style="width:100%" type="submit">Potwierdź kod i zaloguj się</button>
+        <button type="button" class="btn btn-outline" style="width:100%;margin-top:9px" onclick="backToEmail()">Zmień adres e-mail</button>
+      </form>
+      <div class="auth-foot">${isRegister?'Masz już konto? <button onclick="go(\\'/logowanie\\')">Zaloguj się</button>':'Nie masz jeszcze konta? <button onclick="go(\\'/rejestracja\\')">Zarejestruj się</button>'}</div>
+    </div></div>`;
+}
+async function sendOtp(event) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  const email=form.email.value.trim().toLowerCase();
+  const nickname=form.nickname?.value.trim();
+  if(state.authMode==="register" && (!nickname||nickname.length<3)) {
+    toast("Nick musi mieć co najmniej 3 znaki.",true);return;
   }
-
-  message.textContent = "Sprawdzanie kodu...";
-
-  const { data, error } = await supabaseClient.auth.verifyOtp({
-    email: email,
-    token: token,
-    type: "email"
+  const notice=$("#authNotice");
+  notice.innerHTML=`<div class="notice">Wysyłanie kodu…</div>`;
+  if(state.authMode==="register") {
+    const {data:existing,error:checkError}=await db.from("profiles")
+      .select("id").ilike("nickname",nickname).limit(1);
+    if(checkError){notice.innerHTML=`<div class="notice error">Nie udało się sprawdzić nicku. Spróbuj ponownie.</div>`;return;}
+    if(existing?.length){notice.innerHTML=`<div class="notice error">Ten nick jest już zajęty. Wybierz inny.</div>`;return;}
+    sessionStorage.setItem("naTrasiePendingNickname",nickname);
+  }
+  const {error}=await db.auth.signInWithOtp({
+    email,
+    options:{shouldCreateUser:state.authMode==="register"}
   });
-
-  if (error) {
-    message.textContent = "Błędny kod lub kod wygasł: " + error.message;
+  if(error) {
+    notice.innerHTML=`<div class="notice error">${esc(error.message)}<br>Jeśli próbowałeś wiele razy, odczekaj przed kolejną próbą.</div>`;
     return;
   }
-
-  if (pendingNickname && data.user) {
-    const { error: profileError } = await supabaseClient
-      .from("profiles")
-      .update({ nickname: pendingNickname })
-      .eq("id", data.user.id);
-
-    if (profileError) {
-      message.textContent = "Zalogowano, ale nie udało się zapisać nicku: " + profileError.message;
-      return;
+  state.authEmail=email;
+  $("#authForm").classList.add("hidden");
+  $("#otpForm").classList.remove("hidden");
+  $("#sentEmail").textContent=email;
+  notice.innerHTML="";
+  $("#otp").focus();
+}
+function backToEmail() {
+  $("#otpForm").classList.add("hidden");
+  $("#authForm").classList.remove("hidden");
+}
+async function verifyOtp(event) {
+  event.preventDefault();
+  const token=$("#otp").value.trim();
+  if(!/^\d{6}$/.test(token)){toast("Wpisz sześciocyfrowy kod.",true);return;}
+  const {data,error}=await db.auth.verifyOtp({
+    email:state.authEmail,token,type:"email"
+  });
+  if(error){toast("Kod nieprawidłowy lub wygasł: "+error.message,true);return;}
+  state.session=data.session;state.user=data.user;
+  await ensureProfile();
+  await refreshSession();
+  toast("Zalogowano pomyślnie. Witaj na trasie!");
+  go("/");
+}
+async function ensureProfile() {
+  if(!state.user)return;
+  const nickname=sessionStorage.getItem("naTrasiePendingNickname");
+  const {data:profile}=await db.from("profiles").select("id").eq("id",state.user.id).maybeSingle();
+  if(!profile) {
+    const base=nickname || (state.user.email||"Odkrywca").split("@")[0];
+    const {error}=await db.from("profiles").insert({
+      id:state.user.id,nickname:base.slice(0,24)
+    });
+    if(error) {
+      console.error(error);
+      toast("Konto powstało, ale nie udało się utworzyć profilu. Skontaktuj się z administratorem.",true);
     }
   }
-
-  message.textContent = "Zalogowano pomyślnie! Witaj na Na Trasie!";
+  sessionStorage.removeItem("naTrasiePendingNickname");
 }
+
+function collectionPage() {
+  const count=state.stamps.length;
+  const approved=state.stamps.filter(s=>s.status==="approved").length;
+  const pending=state.stamps.filter(s=>s.status!=="approved").length;
+  $("#appMain").innerHTML=`
+    <div class="section-head" style="margin-top:0"><div><h1 class="page-title">Moja książeczka</h1><p class="page-desc">Każda pieczątka to kolejny ślad Twojej podróży.</p></div><button class="btn btn-primary" onclick="go('/dodaj-pieczatke')">＋ Dodaj pieczątkę</button></div>
+    <section class="stats" style="margin:0 0 24px">
+      <div class="stat"><div class="stat-label">Wszystkie zgłoszenia</div><div class="stat-value">${count}</div></div>
+      <div class="stat"><div class="stat-label">Zatwierdzone</div><div class="stat-value">${approved}</div></div>
+      <div class="stat"><div class="stat-label">W trakcie sprawdzania</div><div class="stat-value">${pending}</div></div>
+      <div class="stat"><div class="stat-label">Poziom</div><div class="stat-value">${esc(state.profile?.level??1)}</div></div>
+    </section>
+    <div id="stampCollection">${stampCards(state.stamps)}</div>`;
+}
+function stampCards(stamps) {
+  if(!stamps.length)return `<div class="empty"><div class="empty-icon">📖</div><h3>Twoja książeczka czeka na pierwszą pieczątkę</h3><p>Dodaj zdjęcie pieczątki zdobytej podczas wycieczki. Po sprawdzeniu pojawi się w Twojej kolekcji.</p><button class="btn btn-primary" onclick="go('/dodaj-pieczatke')">Dodaj pierwszą pieczątkę</button></div>`;
+  return `<div class="stamp-grid">${stamps.map(s=>`
+    <article class="stamp-card">
+      <div class="stamp-photo" id="photo-${s.id}">Ładowanie zdjęcia…</div>
+      <div class="stamp-body"><h3>${esc(s.place_name)}</h3>
+      <div class="stamp-meta"><span>${esc(s.region||"Polska")}</span><span>${datePL(s.acquired_at)}</span></div>
+      <div style="margin-top:12px"><span class="status ${statusClass(s.status)}">${statusText(s.status)}</span></div>
+      ${s.status==="rejected"&&s.ai_note?`<p class="help" style="margin-top:9px">${esc(s.ai_note)}</p>`:""}
+      </div>
+    </article>`).join("")}</div>`;
+}
+function statusClass(s) {return s==="approved"?"approved":s==="rejected"?"rejected":s==="review"?"review":"pending";}
+function statusText(s) {return s==="approved"?"Zatwierdzona":s==="rejected"?"Odrzucona":s==="review"?"Do sprawdzenia":"Oczekuje";}
+
+async function addStampPage() {
+  $("#appMain").innerHTML=`
+    <div style="max-width:700px;margin:auto">
+      <h1 class="page-title">Dodaj pieczątkę</h1>
+      <p class="page-desc">Pokaż, gdzie dotarłeś. Dodaj zdjęcie pieczątki i uzupełnij szczegóły.</p>
+      <div class="panel">
+        <form id="stampForm" onsubmit="submitStamp(event)">
+          <div class="form-grid">
+            <div class="field full"><label for="place">Nazwa miejsca *</label><input id="place" name="place" required maxlength="100" placeholder="Np. Schronisko PTTK na Hali Łabowskiej"></div>
+            <div class="field"><label for="region">Województwo / region</label>
+              <select id="region" name="region">
+                <option value="">Wybierz region</option>
+                ${["Dolnośląskie","Kujawsko-pomorskie","Lubelskie","Lubuskie","Łódzkie","Małopolskie","Mazowieckie","Opolskie","Podkarpackie","Podlaskie","Pomorskie","Śląskie","Świętokrzyskie","Warmińsko-mazurskie","Wielkopolskie","Zachodniopomorskie"].map(x=>`<option>${x}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field"><label for="acquired">Data zdobycia *</label><input id="acquired" name="acquired" type="date" max="${new Date().toISOString().slice(0,10)}" required value="${new Date().toISOString().slice(0,10)}"></div>
+            <div class="field full"><label for="photo">Zdjęcie pieczątki *</label><input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required><span class="help">JPG, PNG lub WebP. Maksymalny rozmiar: 8 MB. Zdjęcie powinno wyraźnie przedstawiać pieczątkę.</span></div>
+          </div>
+          <div id="photoPreview" class="hidden" style="margin:15px 0"><img id="previewImg" style="max-width:100%;max-height:260px;border-radius:13px;object-fit:contain"></div>
+          <div class="notice">Po wysłaniu zgłoszenie zostanie sprawdzone. Podejrzane lub niejednoznaczne zdjęcia trafią do administratora.</div>
+          <button class="btn btn-primary" type="submit">Wyślij pieczątkę do sprawdzenia →</button>
+        </form>
+      </div>
+    </div>`;
+  $("#photo").addEventListener("change",e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    if(file.size>8*1024*1024){toast("Zdjęcie jest większe niż 8 MB.",true);e.target.value="";return;}
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){toast("Wybierz zdjęcie JPG, PNG lub WebP.",true);e.target.value="";return;}
+    $("#previewImg").src=URL.createObjectURL(file);
+    $("#photoPreview").classList.remove("hidden");
+  });
+}
+async function submitStamp(event) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  const file=form.photo.files[0];
+  if(!file){toast("Wybierz zdjęcie.",true);return;}
+  const button=form.querySelector("button[type=submit]");
+  button.disabled=true;button.textContent="Wysyłanie…";
+  try {
+    const ext=file.name.split(".").pop().toLowerCase();
+    const path=`${state.user.id}/${crypto.randomUUID()}.${ext}`;
+    const upload=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+    if(upload.error)throw upload.error;
+    const insert=await db.from("stamps").insert({
+      user_id:state.user.id,
+      place_name:form.place.value.trim(),
+      region:form.region.value||null,
+      acquired_at:form.acquired.value,
+      photo_path:path,
+      status:"pending"
+    }).select("id").single();
+    if(insert.error) {
+      await db.storage.from(BUCKET).remove([path]);
+      throw insert.error;
+    }
+    toast("Pieczątka dodana! Czeka na sprawdzenie.");
+    await loadStamps();
+    go("/ksiazeczka");
+    // Próba uruchomienia funkcji TRASIK AI. Brak funkcji oznacza ręczną weryfikację.
+    db.functions.invoke("trasik-check",{body:{stamp_id:insert.data.id}})
+      .then(({error})=>{if(error)console.warn("TRASIK AI: zgłoszenie pozostaje do ręcznej kontroli.",error);})
+      .catch(err=>console.warn(err));
+  } catch(error) {
+    console.error(error);toast("Nie udało się dodać pieczątki: "+(error.message||"błąd"),true);
+    button.disabled=false;button.textContent="Wyślij pieczątkę do sprawdzenia →";
+  }
+}
+
+function profilePage() {
+  const p=state.profile||{};
+  const count=p.stamp_count||0;
+  const level=p.level||1;
+  const next=level*10;
+  const progress=Math.min(100,Math.round((count%10)/10*100));
+  $("#appMain").innerHTML=`
+    <h1 class="page-title">Mój profil</h1><p class="page-desc">Twoja historia na szlaku w jednym miejscu.</p>
+    <div class="panel profile-head">
+      <div class="profile-avatar">${esc(initials(p.nickname))}</div>
+      <div><h2 class="profile-name">${esc(p.nickname||"Podróżnik")}</h2>
+      <div class="profile-info">Na Trasie od ${datePL(p.created_at)} · Poziom ${level}</div></div>
+    </div>
+    <section class="stats" style="margin:18px 0">
+      <div class="stat"><div class="stat-label">Zdobyte pieczątki</div><div class="stat-value">${count}</div></div>
+      <div class="stat"><div class="stat-label">Poziom</div><div class="stat-value">${level}</div></div>
+      <div class="stat"><div class="stat-label">Do następnego poziomu</div><div class="stat-value">${10-(count%10)||10}</div></div>
+      <div class="stat"><div class="stat-label">Osiągnięcia</div><div class="stat-value">${state.achievements.length}</div></div>
+    </section>
+    <div class="panel"><h3>Postęp do kolejnego poziomu</h3><div class="progress"><span style="width:${progress}%"></span></div><div class="progress-caption"><span>${count%10} / 10 pieczątek</span><span>${progress}%</span></div></div>
+    <div class="section-head"><div><h2>Moje osiągnięcia</h2><p>Odznaki zdobyte podczas podróży.</p></div></div>
+    ${achievementCards()}
+    <div style="margin-top:22px"><button class="btn btn-primary" onclick="go('/ksiazeczka')">Zobacz moją książeczkę →</button></div>`;
+}
+function achievementCards() {
+  if(!state.achievements.length)return `<div class="empty"><div class="empty-icon">🏅</div><h3>Twoja kolekcja osiągnięć jest pusta</h3><p>Zdobywaj zatwierdzone pieczątki, aby odblokowywać kolejne odznaki.</p></div>`;
+  return `<div class="features">${state.achievements.map(a=>`<article class="feature-card"><div class="feature-icon">${esc(a.achievements?.icon||"🏅")}</div><h3>${esc(a.achievements?.name||"Osiągnięcie")}</h3><p>${esc(a.achievements?.description||"Zdobyte osiągnięcie")}</p></article>`).join("")}</div>`;
+}
+
+function rankingPage() {
+  $("#appMain").innerHTML=`
+    <h1 class="page-title">Ranking podróżników</h1>
+    <p class="page-desc">Zobacz, kto zebrał najwięcej zatwierdzonych pieczątek w Na Trasie.</p>
+    <div class="panel"><div class="table-wrap"><table>
+      <thead><tr><th>Miejsce</th><th>Podróżnik</th><th>Poziom</th><th>Pieczątki</th></tr></thead>
+      <tbody>${state.ranking.length?state.ranking.map((u,i)=>`
+        <tr><td><span class="rank-number">${i+1}.</span></td>
+        <td><div class="rank-user"><span class="rank-avatar">${esc(initials(u.nickname))}</span>${esc(u.nickname)}</div></td>
+        <td>${esc(u.level||1)}</td><td><strong>${esc(u.stamp_count||0)}</strong></td></tr>`).join(""):`<tr><td colspan="4">Ranking pojawi się, gdy użytkownicy zdobędą pieczątki.</td></tr>`}</tbody>
+    </table></div></div>
+    <p class="help">Ranking uwzględnia wyłącznie zatwierdzone pieczątki.</p>`;
+}
+function updatesPage() {
+  $("#appMain").innerHTML=`
+    <h1 class="page-title">Aktualności</h1><p class="page-desc">Informacje, ogłoszenia i nowości z Na Trasie.</p>
+    ${state.updates.length?state.updates.map(u=>`<article class="update-card"><div class="update-date">${datePL(u.created_at)}</div><h3>${esc(u.title)}</h3><p>${esc(u.content)}</p></article>`).join(""):`<div class="empty"><div class="empty-icon">📰</div><h3>Brak aktualności</h3><p>Gdy administrator opublikuje wiadomość, pojawi się ona w tym miejscu.</p></div>`}`;
+}
+
+async function adminPage() {
+  if(state.profile?.role!=="admin"){go("/");toast("Nie masz uprawnień administratora.",true);return;}
+  const {data:stamps,error}=await db.from("stamps")
+    .select("id,user_id,place_name,region,acquired_at,status,photo_path,created_at,profiles(nickname)")
+    .in("status",["pending","review"]).order("created_at",{ascending:true});
+  if(error)console.error(error);
+  state.adminStamps=stamps||[];
+  $("#appMain").innerHTML=`
+    <h1 class="page-title">Panel administratora</h1><p class="page-desc">Zarządzaj zgłoszeniami pieczątek i publikuj aktualności.</p>
+    <div class="stats" style="margin:0 0 20px">
+      <div class="stat"><div class="stat-label">Do sprawdzenia</div><div class="stat-value">${state.adminStamps.length}</div></div>
+      <div class="stat"><div class="stat-label">Opublikowane aktualności</div><div class="stat-value">${state.updates.length}</div></div>
+    </div>
+    <div class="admin-grid">
+      <section class="panel"><h3>Zgłoszenia do sprawdzenia</h3><p class="panel-sub">Zatwierdź lub odrzuć zdjęcie po obejrzeniu.</p>
+        <div id="adminQueue">${state.adminStamps.length?state.adminStamps.map(s=>`
+          <div class="admin-stamp" id="admin-${s.id}">
+            <img class="admin-thumb" id="admin-photo-${s.id}" alt="Zdjęcie pieczątki">
+            <div class="admin-stamp-info"><strong>${esc(s.place_name)}</strong><small>${esc(s.profiles?.nickname||"Użytkownik")} · ${datePL(s.acquired_at)}</small></div>
+            <div class="admin-actions"><button class="btn btn-primary btn-small" onclick="moderateStamp('${s.id}','approved')">✓</button><button class="btn btn-danger btn-small" onclick="moderateStamp('${s.id}','rejected')">✕</button></div>
+          </div>`).join(""):`<div class="empty"><h3>Brak oczekujących zgłoszeń</h3><p>Wszystko jest na bieżąco.</p></div>`}</div>
+      </section>
+      <section class="panel"><h3>Opublikuj aktualność</h3><p class="panel-sub">Wiadomości widoczne dla wszystkich użytkowników.</p>
+        <form onsubmit="publishUpdate(event)">
+          <div class="field" style="margin-bottom:13px"><label>Tytuł</label><input name="title" maxlength="120" required></div>
+          <div class="field" style="margin-bottom:13px"><label>Treść</label><textarea name="content" maxlength="5000" required></textarea></div>
+          <button class="btn btn-primary" type="submit">Opublikuj aktualność</button>
+        </form>
+      </section>
+    </div>
+    <section class="panel" style="margin-top:18px"><h3>Ostatnie aktualności – zarządzanie</h3>
+      ${state.updates.length?state.updates.map(u=>`<div class="admin-stamp"><div class="admin-stamp-info"><strong>${esc(u.title)}</strong><small>${datePL(u.created_at)}</small></div><button class="btn btn-danger btn-small" onclick="deleteUpdate('${u.id}')">Usuń</button></div>`).join(""):"<p class='help'>Brak opublikowanych aktualności.</p>"}
+    </section>`;
+  for(const s of state.adminStamps) {
+    const url=await signedPhoto(s.photo_path);
+    const img=document.getElementById("admin-photo-"+s.id);
+    if(img&&url)img.src=url;
+  }
+}
+async function moderateStamp(id,status) {
+  if(!confirm(status==="approved"?"Zatwierdzić tę pieczątkę?":"Odrzucić tę pieczątkę?"))return;
+  const {error}=await db.from("stamps").update({status,reviewed_at:new Date().toISOString()}).eq("id",id);
+  if(error){toast("Nie udało się zmienić statusu: "+error.message,true);return;}
+  toast(status==="approved"?"Pieczątka zatwierdzona.":"Pieczątka odrzucona.");
+  await refreshAll();await adminPage();
+}
+async function publishUpdate(event) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  const {error}=await db.from("updates").insert({
+    title:form.title.value.trim(),content:form.content.value.trim(),
+    published:true,created_by:state.user.id
+  });
+  if(error){toast("Nie udało się opublikować: "+error.message,true);return;}
+  toast("Aktualność opublikowana.");
+  await loadUpdates();await adminPage();
+}
+async function deleteUpdate(id) {
+  if(!confirm("Na pewno usunąć tę aktualność?"))return;
+  const {error}=await db.from("updates").delete().eq("id",id);
+  if(error){toast("Nie udało się usunąć: "+error.message,true);return;}
+  toast("Aktualność usunięta.");await loadUpdates();await adminPage();
+}
+
+async function render() {
+  state.route=currentRoute();
+  setNav();
+  if(needConfig())return;
+  if(state.route==="/logowanie"||state.route==="/rejestracja") {
+    authPage(state.route==="/rejestracja"?"register":"login");return;
+  }
+  if(state.route==="/") {homePage();return;}
+  if(state.route==="/ranking") {rankingPage();return;}
+  if(state.route==="/aktualnosci") {updatesPage();return;}
+  if(!state.user) {go("/logowanie");toast("Zaloguj się, aby otworzyć tę stronę.");return;}
+  if(state.route==="/ksiazeczka") {
+    await loadStamps();collectionPage();
+    for(const s of state.stamps) {
+      const url=await signedPhoto(s.photo_path);
+      const el=document.getElementById("photo-"+s.id);
+      if(el)el.innerHTML=url?`<img src="${esc(url)}" alt="Pieczątka z ${esc(s.place_name)}">`:"Nie udało się wczytać zdjęcia";
+    }
+    return;
+  }
+  if(state.route==="/dodaj-pieczatke") {await addStampPage();return;}
+  if(state.route==="/profil") {await loadProfile();await loadAchievements();profilePage();return;}
+  if(state.route==="/admin") {await adminPage();return;}
+  $("#appMain").innerHTML=`<div class="empty"><h3>Nie znaleziono strony</h3><button class="btn btn-primary" onclick="go('/')">Wróć na start</button></div>`;
+}
+async function refreshAll() {
+  await refreshSession();
+  await Promise.all([loadUpdates(),loadRanking()]);
+  if(state.user)await Promise.all([loadStamps(),loadAchievements()]);
+  setNav();
+}
+window.addEventListener("hashchange",render);
+
+(async function init(){
+  if(!db){render();return;}
+  await refreshAll();
+  db.auth.onAuthStateChange(async (_event,session)=>{
+    state.session=session;state.user=session?.user||null;
+    if(state.user)await loadProfile();else state.profile=null;
+    setNav();
+    if(state.route==="/")homePage();else render();
+  });
+  await render();
+})();
 </script>
+</body>
 </html>
